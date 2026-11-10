@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MouseHarp · a synthesizer played by a cubic millimetre of mouse visual cortex</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One+SC&family=Courier+Prime:wght@400;700&family=Spline+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/mouse.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Ccircle cx=%224%22 cy=%224%22 r=%223%22 fill=%22%23ECEBE5%22/%3E%3Ccircle cx=%2212%22 cy=%224%22 r=%223%22 fill=%22%23ECEBE5%22/%3E%3Ccircle cx=%228%22 cy=%2210%22 r=%225%22 fill=%22%23ECEBE5%22/%3E%3C/svg%3E">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <svg id="logo" viewBox="0 0 72 56" aria-hidden="true">
+      <!-- a mouse whose whiskers are harp strings -->
+      <circle cx="22" cy="14" r="9" fill="#ECEBE5"/><circle cx="22" cy="14" r="5" fill="#FF68BA"/>
+      <circle cx="50" cy="14" r="9" fill="#ECEBE5"/><circle cx="50" cy="14" r="5" fill="#FF68BA"/>
+      <path d="M36 50 C 20 50, 14 38, 18 28 C 22 18, 50 18, 54 28 C 58 38, 52 50, 36 50 Z" fill="#ECEBE5"/>
+      <circle cx="29" cy="32" r="2.6" fill="#101217"/><circle cx="43" cy="32" r="2.6" fill="#101217"/>
+      <circle cx="29.8" cy="31.2" r=".8" fill="#fff"/><circle cx="43.8" cy="31.2" r=".8" fill="#fff"/>
+      <ellipse cx="36" cy="42" rx="3" ry="2.2" fill="#FF68BA"/>
+      <g class="strings left" stroke="#7DB0FF" stroke-width="0.9" stroke-linecap="round"><line x1="31" y1="42" x2="4" y2="36"/><line x1="31" y1="43.5" x2="3" y2="44"/><line x1="31" y1="45" x2="5" y2="52"/></g>
+      <g class="strings right" stroke="#7DB0FF" stroke-width="0.9" stroke-linecap="round"><line x1="41" y1="42" x2="68" y2="36"/><line x1="41" y1="43.5" x2="69" y2="44"/><line x1="41" y1="45" x2="67" y2="52"/></g>
+    </svg>
+    <div class="titles">
+      <h1 class="logo" aria-label="MouseHarp"><span class="ink">MOUSE<span class="lc">harp</span></span><span class="mis" aria-hidden="true">MOUSE<span class="lc">harp</span></span></h1>
+      <span class="kicker">a synthesizer played by a cubic millimetre of mouse visual cortex</span>
+    </div>
+  </div>
+  <button id="go" class="go">▶ Start</button>
+  <div id="status" class="status">loading the cubic millimetre…</div>
+</header>
+
+<main>
+  <aside id="controls">
+    <section>
+      <h2>What the mouse sees</h2>
+      <label>stimulus
+        <select id="kind">
+          <option value="webcam" selected>webcam</option>
+          <option value="rotate">rotating grating (plays a scale)</option>
+          <option value="grating">drifting grating</option>
+          <option value="bar">moving bar</option>
+          <option value="dots">drifting dots</option>
+          <option value="flash">full-field flashes</option>
+          <option value="paint">draw on the screen</option>
+        </select></label>
+      <label>contrast <input type="range" id="contrast" min="0.05" max="1" step="0.05" value="0.8"><output></output></label>
+      <label>orientation <input type="range" id="ori" min="0" max="165" step="15" value="0"><output></output></label>
+      <label>spatial frequency <input type="range" id="sf" min="2" max="12" step="0.5" value="5"><output></output></label>
+      <label>speed <input type="range" id="speed" min="0.1" max="3" step="0.1" value="1"><output></output></label>
+      <label>size <input type="range" id="size" min="2" max="16" step="1" value="6"><output></output></label>
+    </section>
+    <section>
+      <h2>Time</h2>
+      <label>tempo (× real time) <input type="range" id="tempo" min="0.1" max="1.5" step="0.05" value="0.6"><output></output></label>
+      <button id="reset" class="small">reset network</button>
+    </section>
+    <section>
+      <h2>Strings</h2>
+      <p class="hint">Each cell class is an instrument. Within a class, every 30° of preferred orientation is its own string, so the angle of what you show sets the note. Hover a class for what it does.</p>
+      <div id="classes"></div>
+      <div class="areaRow" id="areaRow"></div>
+      <label>threshold <input type="range" id="thresh" min="0.03" max="0.5" step="0.01" value="0.12"><output></output></label>
+      <label>max notes / s <input type="range" id="rate" min="4" max="60" step="1" value="22"><output></output></label>
+    </section>
+    <section>
+      <h2>Pitch</h2>
+      <label>scale <select id="scale">
+        <option value="majpent">major pentatonic</option><option value="minpent">minor pentatonic</option>
+        <option value="dorian">dorian</option><option value="lydian">lydian</option><option value="hirajoshi">hirajoshi</option>
+        <option value="whole">whole tone</option></select></label>
+      <label>root <select id="root"></select></label>
+    </section>
+    <section>
+      <h2>Output</h2>
+      <label class="row"><input type="checkbox" id="internal" checked> internal harp</label>
+      <label>volume <input type="range" id="vol" min="0" max="1" step="0.05" value="0.7"><output></output></label>
+      <label>reverb <input type="range" id="rev" min="0" max="1" step="0.05" value="0.4"><output></output></label>
+      <label>MIDI out <select id="midiOut"><option value="">none</option></select></label>
+      <p class="hint">MIDI: one channel per cell class (1–8).</p>
+    </section>
+  </aside>
+
+  <section id="stage">
+    <section class="hero">
+      <div class="heroEye">
+        <canvas id="view" width="1280" height="720"></canvas>
+        <div class="lensTag" id="lensTag"></div>
+        <figure class="raw"><canvas id="raw" width="128" height="72"></canvas><figcaption>what the mouse sees</figcaption></figure>
+      </div>
+      <div class="lensPanel">
+        <h2 class="heroTitle">What the cortex sees</h2>
+        <p class="lead">Each tick is a neuron from the MICrONS volume, drawn where its receptive field sits and at its preferred orientation. Ticks light up as that neuron responds, so the image is redrawn as the cortex encodes it.</p>
+        <div id="lenses" class="lenses mlenses"></div>
+        <div class="lensInfo" id="lensInfo"></div>
+        <div class="lensLegend" id="lensLegend"><canvas id="oriKey" width="120" height="44"></canvas><span>tick angle and colour: preferred orientation · brightness: response</span></div>
+        <label class="row small"><input type="checkbox" id="underlay" checked> show the image underneath</label>
+        <p class="hint" id="viewHint"></p>
+      </div>
+    </section>
+    <figure class="rollbox">
+      <canvas id="roll" width="1180" height="240"></canvas>
+      <figcaption class="legend"><span>notes by cell class · pitch = preferred orientation · time runs right → left</span></figcaption>
+    </figure>
+    <figure>
+      <canvas id="traces" width="1180" height="300"></canvas>
+      <figcaption class="legend"><span>mean activity of each class over the last few seconds · solid V1, dashed higher areas (RL, AL, LM)</span></figcaption>
+    </figure>
+    <section class="lobeBox">
+      <div class="lobeHead">
+        <h2 class="heroTitle">Inside the cubic millimetre</h2>
+        <p class="lead">Every neuron at the position of its soma in the electron-microscopy volume, pia at the top, white matter at the bottom. The strongest synapses are sticks. Drag to turn, pinch or scroll to zoom, hover a ball to name it.</p>
+      </div>
+      <div class="lobeWrap" id="lobeWrap">
+        <canvas id="lobe"></canvas>
+        <div id="lobeLabels"></div>
+        <div class="lobeTools"><button class="small on" id="lobeSpin">spin</button><button class="small on" id="lobeSticks">synapses</button><button class="small" id="lobeView">3/4 view</button><button class="small" id="lobeSide">side view</button><button class="small" id="lobeTop">from above</button></div>
+        <div class="lobeTip" id="lobeTip"></div>
+        <div class="lobeCount" id="lobeCount">loading…</div>
+      </div>
+      <figcaption class="legend"><span><i class="dot" style="background:#ffb44f"></i>active pyramidal cell</span><span><i class="dot" style="background:#6a7dff"></i>active interneuron</span><span><i class="sw" style="background:#ffae42"></i>excitatory synapse carrying activity</span><span><i class="sw" style="background:#6a7dff"></i>inhibitory</span><span class="muted">sticks fade toward the cell they drive · real EM soma positions (µm)</span></figcaption>
+    </section>
+    <details class="about" open>
+      <summary>What am I hearing?</summary>
+      <p id="aboutData"></p>
+      <p>The network is a rate model. Each neuron sums its synaptic input through the measured connectome, with excitatory or inhibitory sign from its cell class and weight from its synapse count, then responds through a rectifying, saturating nonlinearity with spike-rate adaptation. Inhibitory cells are faster than pyramidal cells.</p>
+      <p>The image enters only through the neurons that were imaged in the living mouse. Each is driven by oriented contrast energy at its receptive-field centre and preferred orientation, from the MICrONS digital twin (Wang et al. 2025; Ding et al. 2025), mixed with untuned contrast according to how selective it is. Everything else, including every inhibitory cell and most of L5 and L6, is driven only through the wiring.</p>
+      <p>Each cell class is a string family; each 30° of preferred orientation is a string. When a string's mean activity rises past threshold, relative to its own response range, it plucks a note: pitch from orientation, octave and instrument from class, stereo position from area. Cells that were not imaged are assigned the orientation and receptive field they acquire in the model, mapped in silico with gratings at 12 angles and flickering patches on a grid; for the imaged cells this mapping recovers their measured preference to within a couple of degrees. Cells that end up broadly tuned play the root, an octave down.</p>
+      <p><b>What this is not.</b> The synaptic gains, time constants and nonlinearity were set by hand for stable, musical dynamics, not fit to the recordings, unlike the trained fly model behind FlyHarp. Most axons in the volume are not proofread, so many connections are missing or fragmentary, and the volume has no thalamic cell bodies, so the real feedforward input is stood in for by the measured tuning. Treat it as the MICrONS wiring played through a simple model, not as a simulation of mouse V1.</p>
+      <p class="muted">Data: MICrONS Consortium et al., Nature 2025; connectome export by Reimann et al. (Zenodo 16744240, v1412); digital twin properties from Wang et al. and Ding et al., Nature 2025. Sister project: <a href="https://github.com/samuelling/FlyHarp">FlyHarp</a>.</p>
+    </details>
+  </section>
+</main>
+<div class="tip" id="tip"></div>
+<script src="js/info.js"></script>
+<script src="js/stimuli.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/app.js"></script>
+<script type="module" src="js/cortex3d.js"></script>
+</body>
+</html>

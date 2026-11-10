@@ -1,0 +1,25 @@
+/* MouseHarp additions on top of the shared FlyHarp stylesheet */
+.lenses.mlenses{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:none;gap:8px;row-gap:8px;margin-bottom:12px}
+.heroEye #view{width:100%;border-radius:16px;touch-action:none;background:#07080a;display:block;aspect-ratio:16/9;height:auto}
+.heroEye{flex:1 1 720px;min-width:300px}
+.raw canvas{width:160px;image-rendering:auto}
+.raw{width:160px}
+.mclass{display:grid;grid-template-columns:10px 38px minmax(0,1fr) 22px 22px;align-items:center;gap:5px;padding:4px 6px;margin:3px 0;border:1px solid var(--line);border-radius:8px;background:#121419;font-size:12px}
+.mclass .swatch{width:10px;height:10px;border-radius:3px;display:block}
+.mclass b{font-size:12.5px}
+.mclass .nm{display:none}
+.mclass select{font-size:11px;padding:2px 3px}
+.mclass .sm{background:var(--panel);color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:1px 0;cursor:pointer;font:inherit;font-size:10.5px}
+.mclass .sm.on{color:#111;background:var(--acc);border-color:var(--acc)}
+.mclass .cnt{display:none}
+.mclass.muted{opacity:.45}
+.areaRow{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0 4px}
+.areaRow .chip{font-size:11px;padding:2px 8px}
+.areaRow .chip.on{background:#2a2f3a;color:var(--ink);border-color:#4a5060}
+.areaRow .chip span{color:var(--muted);font-size:10px}
+#logo .strings.ring line{animation:ring .22s ease-out}
+.lensLegend{gap:12px}
+#oriKey{flex:none}
+.lobeLabel.dim{color:#7d838d}
+.lobeLabel.area{color:#ffd9a0;font-size:11px}
+@media(max-width:800px){.raw{width:30%;right:8px;bottom:8px}.raw canvas{width:100%}.lenses.mlenses{grid-template-columns:repeat(2,minmax(0,1fr))}}
