@@ -10,7 +10,10 @@ self.onmessage = async (ev) => {
   const msg = ev.data;
   if (msg.cmd === 'init') {
     const get = f => fetch(msg.base + f);
-    const [meta, net, cells] = await Promise.all([get('meta.json').then(r => r.json()), get('net.bin').then(r => r.arrayBuffer()), get('cells.bin').then(r => r.arrayBuffer())]);
+    // binaries as shipped; hosts that refuse .bin get a base64-in-JSON copy instead (data/*.b64.json)
+    const loadBin = async f => { const r = await get(f + '.bin'); if (r.ok) return r.arrayBuffer();
+      const s = (await (await get(f + '.b64.json')).json()).b64, u = Uint8Array.from(atob(s), c => c.charCodeAt(0)); return u.buffer; };
+    const [meta, net, cells] = await Promise.all([get('meta.json').then(r => r.json()), loadBin('net'), loadBin('cells')]);
     eng = new MouseEngine(meta, net, cells);
     // strings: cell class (8) x area (4) x orientation bin (7)
     nS = 8 * 4 * NB; sOf = new Int32Array(eng.N); sCount = new Float32Array(nS);
