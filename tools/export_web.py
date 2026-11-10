@@ -10,7 +10,6 @@ os.makedirs(BUILD, exist_ok=True)
 import sys, json, numpy as np; sys.path.insert(0, HERE)
 from sim import *
 OUT = sys.argv[1] if len(sys.argv) > 1 else WEB
-GAINS = dict(gEE=2.5, gEI=1.5, gIE=2.5, gII=1.0); RUN = dict(gain_in=4.0, h=0.05, k=1.0, rmax=1.0, adapt=0.85, trans=2.0, b_ad=1.5)
 fullE, fullI = M['fullE'], M['fullI']
 cnt = np.minimum(M['cnt'], 255).astype(np.uint8)
 # per-post rescale factors that were folded into w (w = cnt * scale[post]); recompute so the browser can rebuild w exactly

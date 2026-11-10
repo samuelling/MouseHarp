@@ -9,8 +9,7 @@ os.makedirs(BUILD, exist_ok=True)
 
 import sys, json, numpy as np; sys.path.insert(0, HERE)
 from sim import *
-meta = json.load(open(os.path.join(WEB, 'meta.json')))
-W, _ = build(**meta['gains']); RUN = meta['run']
+W, _ = build(**GAINS)
 blank = [np.full((H_IMG, W_IMG), 0.5)] * 6
 # ---- orientation
 TH = np.arange(0, 180, 15); resp = []

@@ -47,6 +47,9 @@ def build(gEE=1.0, gEI=1.0, gIE=1.0, gII=1.0):
     pre_i = inh[src]; post_i = inh[post]
     g = np.where(pre_i, -np.where(post_i, gII, gEI) / normI, np.where(post_i, gIE, gEE) / normE)
     return sps.csr_matrix((w * g, (post, src)), shape=(N, N)).astype(np.float32), g.astype(np.float32)
+# hand-set gains (E->E, I->E, E->I, I->I) and run parameters, shared by map_model.py and export_web.py
+GAINS = dict(gEE=2.5, gEI=1.5, gIE=2.5, gII=1.0)
+RUN = dict(gain_in=4.0, h=0.05, k=1.0, rmax=1.0, adapt=0.85, trans=2.0, b_ad=1.5)
 TAU = np.where(inh, 0.010, 0.020); DT = 0.02 / 3; ALPHA = (1 - np.exp(-DT / TAU)).astype(np.float32); ALPHA_A = np.float32(1 - np.exp(-DT / 0.3))  # adaptation, 300 ms
 def run(W, frames, steps_per_frame=3, gain_in=4.0, h=0.05, k=1.0, rmax=1.0, r0=None, adapt=0.85, trans=2.0, record=None, b_ad=1.0):
     r = np.zeros(N, np.float32) if r0 is None else r0.copy(); A = np.zeros(N, np.float32)

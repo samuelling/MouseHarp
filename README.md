@@ -46,7 +46,6 @@ This is the MICrONS wiring played through a simple model, not a simulation of mo
 tools/fetch_data.sh                  # ~1.1 GB from Zenodo and the MICrONS BossDB bucket
 cd tools
 python build_model.py                # join connectome + function, prune, rescale  -> build/model.npz
-python export_web.py                 # first pass writes data/meta.json (gains)
 python map_model.py                  # in-silico orientation and RF mapping          -> build/model_tuning.npz
 python export_web.py                 # browser files                                 -> ../data/
 node validate_engine.js ../data build/ref.json   # JS engine vs Python reference
