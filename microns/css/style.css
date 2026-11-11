@@ -1,0 +1,150 @@
+:root{--bg:#0e0f12;--panel:#16181d;--line:#262932;--ink:#e9e6df;--muted:#8d8a83;--acc:#f0a04b;--blue:#5aa6e8;
+  --g0:#8f7fd6;--g1:#4fb3a4;--g2:#e0c35a;--g3:#e88a4f;--g4:#e2576b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif}
+header{display:flex;align-items:center;gap:18px;padding:12px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+
+.go{background:var(--acc);color:#1a1206;border:0;border-radius:20px;padding:8px 18px;font:600 14px inherit;cursor:pointer}
+.go.playing{background:#2c2f38;color:var(--ink)}
+.status{color:var(--muted);font-size:12.5px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:4px 12px}
+main{display:flex;gap:0;min-height:calc(100vh - 60px)}
+aside{width:290px;flex:0 0 290px;border-right:1px solid var(--line);padding:6px 16px 30px;overflow-y:auto;max-height:calc(100vh - 60px)}
+aside section{border-bottom:1px solid var(--line);padding:10px 0 12px}
+aside h2{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:4px 0 8px;font-weight:600}
+label{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;margin:6px 0;font-size:13px}
+label input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--acc)}
+label output{color:var(--muted);font-variant-numeric:tabular-nums;font-size:12px;grid-row:1;grid-column:2}
+label select{grid-column:1/-1}
+label.row{display:flex;gap:8px}
+select{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:4px 6px;font:inherit;font-size:13px;width:100%}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-left:auto}
+.seg button{background:var(--panel);color:var(--muted);border:0;padding:3px 12px;cursor:pointer;font:inherit;font-size:12px}
+.seg button.on{background:#2c2f38;color:var(--ink)}
+button.small{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:4px 10px;cursor:pointer;font:inherit;font-size:12px}
+.hint{color:var(--muted);font-size:12px;margin:4px 0}
+#stage{flex:1;padding:14px 18px;min-width:0}
+.top{display:flex;gap:16px;flex-wrap:wrap}
+figure{margin:0 0 14px}
+figcaption{color:var(--muted);font-size:12px;margin-top:4px}
+canvas{background:#0a0b0d;border:1px solid var(--line);border-radius:10px;display:block;max-width:100%;height:auto}
+
+.rollbox canvas{width:100%}
+#cascade{width:100%}
+.about{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;max-width:900px;color:#cfccc4}
+.about summary{cursor:pointer;color:var(--ink)}
+@media(max-width:800px){main{flex-direction:column}aside{width:auto;flex:none;max-height:none;border-right:0;border-top:1px solid var(--line);order:2}.eyebox canvas{width:100%}
+  /* phones: the camera / fly's-eye view comes first, controls follow below */
+  #stage{order:1;padding:10px 10px 14px}.hero{gap:12px}.heroEye{flex:1 1 100%;min-width:0}
+  .raw{width:34%;right:8px;bottom:8px}.raw canvas{width:100%}
+  .heroTitle{font-size:22px}.logo{font-size:32px}}
+
+.presets{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 10px}
+.presets button,.area .sm{background:var(--panel);color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:2px 7px;cursor:pointer;font:inherit;font-size:11.5px}
+.presets button:hover{color:var(--ink)}
+.area{border:1px solid var(--line);border-radius:8px;padding:7px 8px;margin:6px 0;background:#121419}
+.area.muted{opacity:.45}
+.area .head{display:flex;align-items:center;gap:6px;font-size:12.5px}
+.area .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.area .nm{flex:1;font-weight:600}
+.area .sm.on{color:#111;background:var(--acc);border-color:var(--acc)}
+.area .sm.mute.on{background:#c0504d;border-color:#c0504d;color:#fff}
+.area .row2{display:flex;gap:6px;align-items:center;margin:5px 0 4px}
+.area .row2 select{width:auto;flex:1;font-size:12px;padding:2px 4px}
+.area .row2 input{flex:1;accent-color:var(--acc)}
+.chips{display:flex;flex-wrap:wrap;gap:3px}
+.chip{font-size:10.5px;padding:1px 6px;border-radius:9px;border:1px solid var(--line);color:var(--muted);background:transparent;cursor:pointer;font-family:inherit}
+.chip.on{color:#111}
+.area .pol{display:inline-flex;gap:2px;margin-right:4px}.area .sm.pl{padding:2px 6px}
+
+.tip{position:fixed;z-index:20;max-width:340px;background:#1b1e25f2;border:1px solid #333845;border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.45;color:#dcd9d1;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 6px 24px #0008}
+.tip.on{opacity:1}
+.tip h4{margin:0 0 2px;font-size:13.5px;color:var(--ink)}
+.tip .k{color:var(--muted);font-size:11.5px;margin-bottom:6px}
+.tip .meta{color:var(--muted);font-size:11.5px;margin-top:6px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend .muted{color:#6c6a64}
+.sw{display:inline-block;width:16px;height:6px;border-radius:2px;background:#9a988f}
+.sw.hollow{background:transparent;border:1.5px solid #9a988f;height:7px}
+.grad{display:inline-block;width:90px;height:8px;border-radius:4px;background:linear-gradient(90deg,#5aa6e8,#202228 50%,#f0a04b)}
+.ring{display:inline-block;width:11px;height:11px;border-radius:50%;border:2px solid #e0c35a}
+.ring.dash{border:2px dashed #5aa6e8}
+.area .head .nm{cursor:help}
+figcaption{line-height:1.6}
+#fbMeter{width:100%;height:auto;margin-top:4px;background:#0f1115}
+
+.hero{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap;margin-bottom:16px}
+.heroEye{position:relative;flex:0 1 640px;min-width:300px}
+.heroEye #eye{width:100%;border-radius:16px;cursor:crosshair;touch-action:none;background:radial-gradient(circle at 50% 45%,#15171c,#07080a 70%)}
+.lensTag{position:absolute;left:14px;top:12px;font-size:12px;color:#cfccc4;background:#0b0c0fcc;border:1px solid var(--line);border-radius:12px;padding:3px 10px;pointer-events:none}
+.raw{position:absolute;right:12px;bottom:12px;margin:0;width:150px}
+.raw canvas{width:150px;border-radius:8px;border:1px solid #333845}
+.raw figcaption{font-size:10.5px;text-align:right;margin-top:2px}
+.lensPanel{flex:1 1 380px;min-width:300px;max-width:580px}
+.heroTitle{font-size:28px;margin:4px 0 6px;letter-spacing:-.01em;font-weight:650}
+.lead{color:#bdbab2;margin:0 0 14px;font-size:14.5px}
+.lenses{position:relative;display:grid;grid-template-columns:66px minmax(0,1fr) minmax(0,1fr) 92px;grid-template-rows:repeat(4,auto);column-gap:10px;row-gap:22px;margin-bottom:14px;align-items:center}
+.lenses .stage{grid-column:1;position:relative;z-index:1;text-align:center;text-shadow:0 0 4px #0d0f13,0 0 2px #0d0f13;font:700 9.5px/1.15 "Courier Prime","Courier New",monospace;letter-spacing:.12em;text-transform:uppercase;color:#aab0b9;align-self:center}
+.lenses .lens{position:relative;z-index:1}
+.lens[data-l="photo"],.lens[data-l="lamina"],.lens[data-l="motion"]{justify-self:center;width:min(100%,250px)}
+.lens[data-l="feedback"]{align-self:center;padding:8px 8px}
+.lens[data-l="feedback"] .bar{width:20px}
+.wires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:visible}
+.wires path{fill:none;stroke:#3a3f4a;stroke-width:1.5}
+.wires path.glass{fill:url(#hg);stroke:#ffffff22;stroke-width:1}
+.wires path.fb{stroke:#4a5290;stroke-dasharray:4 4}
+.wires path.lit{stroke:var(--acc);stroke-width:2}
+.wires path.fb.lit{stroke:#7f8cff;animation:fbflow 1.2s linear infinite}
+.wires path.hd{stroke-dasharray:none;animation:none}
+@keyframes fbflow{to{stroke-dashoffset:-16}}
+.lens.path{border-color:#5a4f36}
+@media (prefers-reduced-motion:reduce){.wires path.fb.lit{animation:none}}
+.lens{text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer;color:var(--ink);font:inherit}
+.lens b{display:block;font-size:13px}.lens span{display:block;color:var(--muted);font-size:11.5px;line-height:1.35}
+.lens em.n{display:block;font:700 9.5px/1.2 "Courier Prime","Courier New",monospace;letter-spacing:.08em;color:#8a8f98;margin-top:4px;font-style:normal}
+.lens .bar{display:block;height:3px;border-radius:2px;margin-bottom:6px;width:28px}
+.lens.on{border-color:var(--acc);background:#1d1a14}
+.lensInfo{font-size:13px;color:#cfccc4;background:#121419;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px;line-height:1.5}
+.lensLegend{display:flex;align-items:center;gap:10px;font-size:11.5px;color:var(--muted);margin-bottom:8px;min-height:44px}
+.lensLegend canvas{border:0;background:none;border-radius:0}
+label.small{font-size:12.5px;margin:3px 0}
+
+.brand{display:flex;align-items:center;gap:10px}
+#logo{width:64px;height:50px;flex:none;overflow:visible}
+#logo .wing{transform-box:fill-box;animation:flutter 2.6s ease-in-out infinite}
+#logo .wing.left{transform-origin:100% 80%}#logo .wing.right{transform-origin:0% 80%;animation-delay:.05s}
+@keyframes flutter{0%,100%{transform:rotate(0)}48%{transform:rotate(0)}50%{transform:rotate(-7deg)}52%{transform:rotate(3deg)}54%{transform:rotate(0)}}
+#logo .wing.right{animation-name:flutterR}
+@keyframes flutterR{0%,100%{transform:rotate(0)}48%{transform:rotate(0)}50%{transform:rotate(7deg)}52%{transform:rotate(-3deg)}54%{transform:rotate(0)}}
+#logo .strings.ring line{animation:ring .22s ease-out}
+@keyframes ring{0%{stroke:#f0a04b;stroke-width:1.1;transform:translateX(.6px)}30%{transform:translateX(-.5px)}60%{transform:translateX(.3px)}100%{stroke:#e9e6df;transform:none}}
+.titles{display:flex;flex-direction:column;gap:4px}
+/* megaZINE-style mast: Bowlby caps in toner, lowercase Spline superscript, and a pink riso pass
+   printed slightly out of register (screen blend on the dark page). It slips like a copier sheet on notes. */
+.logo{position:relative;display:inline-block;font:400 40px/.86 "Bowlby One SC","Arial Black",Impact,sans-serif;letter-spacing:-.02em;margin:0;color:#ECEBE5;isolation:isolate}
+.logo .lc{font-family:"Spline Sans","Helvetica Neue",Arial,sans-serif;font-weight:600;letter-spacing:-.04em;font-size:.6em;vertical-align:.7em;margin-left:.06em;color:#7DB0FF}
+.logo .ink{position:relative;z-index:1}
+.logo .mis{position:absolute;left:0;top:0;color:#FF68BA;mix-blend-mode:screen;transform:translate(.035em,.03em) rotate(-.6deg);transform-origin:left top;pointer-events:none;z-index:2;opacity:.85;white-space:nowrap}
+.logo .mis .lc{color:#FF68BA}
+@keyframes logo-jit-ink{0%{transform:none}20%{transform:translate(-.014em,.006em)}45%{transform:translate(.012em,-.01em) skewX(-1.2deg)}70%{transform:translate(-.006em,.004em)}100%{transform:none}}
+@keyframes logo-jit-mis{0%{transform:translate(.035em,.03em) rotate(-.6deg)}20%{transform:translate(.075em,.012em) rotate(-1.3deg)}45%{transform:translate(.008em,.055em) rotate(.25deg)}70%{transform:translate(.055em,.038em) rotate(-.95deg)}100%{transform:translate(.035em,.03em) rotate(-.6deg)}}
+.logo.jit .ink{animation:logo-jit-ink .34s steps(1,end)}.logo.jit .mis{animation:logo-jit-mis .34s steps(1,end)}
+.kicker{font:700 10.5px/1.2 "Courier Prime","Courier New",monospace;letter-spacing:.14em;text-transform:uppercase;color:#A0A6AF}
+.kicker i{font-style:italic;text-transform:none;letter-spacing:.04em}
+@media (prefers-reduced-motion:reduce){.logo.jit .ink,.logo.jit .mis{animation:none}}
+
+/* inside the optic lobe: 3D ball-and-stick */
+.lobeBox{margin:6px 0 22px}
+.lobeHead{max-width:760px}
+.lobeWrap{position:relative;height:min(72vh,640px);border:1px solid var(--line);border-radius:16px;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#151821,#07080a 72%)}
+.lobeWrap canvas{width:100%;height:100%;border:0;border-radius:0;background:none;touch-action:none;cursor:grab;display:block;max-width:none}
+.lobeWrap canvas:active{cursor:grabbing}
+#lobeLabels{position:absolute;inset:0;pointer-events:none}
+.lobeLabel{position:absolute;left:0;top:0;font:700 10px/1 "Courier Prime","Courier New",monospace;letter-spacing:.14em;text-transform:uppercase;color:#c9ccd3;text-shadow:0 0 6px #000,0 0 2px #000;white-space:nowrap}
+.lobeTools{position:absolute;right:10px;top:10px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.lobeTools button{background:#0b0c0fcc}.lobeTools button.on{border-color:var(--acc);color:var(--acc)}
+.lobeTip{position:absolute;max-width:300px;pointer-events:none;opacity:0;transition:opacity .1s;background:#1b1e25f2;border:1px solid #333845;border-radius:9px;padding:7px 10px;font-size:12px;line-height:1.4;color:#dcd9d1;z-index:3}
+.lobeTip .dep{color:#ffb44f}.lobeTip .hyp{color:#7fb6ff}
+.lobeCount{position:absolute;left:12px;bottom:10px;font:700 9.5px/1.2 "Courier Prime","Courier New",monospace;letter-spacing:.1em;text-transform:uppercase;color:#7d838d;pointer-events:none}
+.legend .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+@media(max-width:800px){.lobeWrap{height:62vh}}

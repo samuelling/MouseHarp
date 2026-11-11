@@ -1,63 +1,82 @@
 # MouseHarp
 
-A synthesizer played by a cubic millimetre of mouse visual cortex. Sister project to [FlyHarp](https://github.com/samuelling/FlyHarp).
+A synthesizer played by a model of mouse primary visual cortex and its thalamic input. Sister project to [FlyHarp](https://github.com/samuelling/FlyHarp).
 
-Point your webcam at something, or pick a grating, and the image drives **50,948 neurons from the MICrONS volume**, wired by their measured synapses. Each cell class is an instrument, and every 30° of preferred orientation is a string. Turn a pen in front of the camera and you play a scale.
+Point your webcam at something, or pick a grating, and the image runs through:
+- the mouse **LGN** (ON and OFF thalamic cells with receptive fields fit to recordings);
+- a **spiking model of V1** built from Allen Institute data and trained to match Neuropixels recordings.
 
-**Run it locally:** `python -m http.server` in this folder, then open http://localhost:8000. Everything runs in the browser; the network steps in a Web Worker.
+Each cell family is an instrument:
+- In V1, every 30° of preferred orientation is a string, so turning a pen in front of the camera plays a scale.
+- In the LGN, each strip of visual field is a string.
 
-## What's in it
+**Run it:** `python -m http.server` here, then open http://localhost:8000. Everything runs in your browser; the network steps 1 ms at a time in a Web Worker, as fast as your machine allows.
 
-- **What the cortex sees.** Every imaged neuron is drawn as a tick at its receptive-field centre and preferred orientation, lit by its response. Other lenses show L2/3, L4, L5, L6 and the interneurons.
-- **Strings.** Eight cell classes (L2/3, L4, L5, L6 pyramidal; perisomatic-, dendrite-, sparsely- and inhibitory-targeting interneurons) × four areas (V1, RL, AL, LM) × seven orientation bins.
-  - Pitch comes from orientation; octave and instrument come from cell class; stereo position comes from area.
-  - Broadly tuned cells play the root.
-  - MIDI out uses one channel per class.
-- **Activity traces** for each class, V1 vs higher areas.
-- **Inside the cubic millimetre.** A 3D ball-and-stick view of every neuron at its EM soma position, with the two strongest inputs per cell as sticks, all lit live.
+The earlier version, driven by the **MICrONS connectome** and its digital-twin tuning, is at [`microns/`](microns/).
 
 ## The model
 
-- **Wiring.** The MICrONS v1412 connectome as exported by Reimann (Zenodo [16744240](https://doi.org/10.5281/zenodo.16744240), CC-BY 4.0): 50,948 neurons and 11.55M synapses in 7.46M connections, internal to the volume.
-  - MouseHarp keeps the 1.89M connections made of ≥ 2 synapses (6.0M synapses).
-  - Each neuron's kept excitatory and inhibitory input is rescaled to its full total.
-  - Sign comes from the presynaptic cell class; weight comes from synapse count.
-- **Dynamics.** A rate model: τ dr/dt = −r + f(Σ w r + input + h − b·a).
-  - f is a rectified, saturating square law; a is spike-rate adaptation (300 ms).
-  - τ is 20 ms for pyramidal cells and 10 ms for interneurons; the step is 6.7 ms.
-  - The four E/I gain parameters were set by hand for stable dynamics that return to rest.
-- **Input.** Only the 11,483 neurons that were imaged in vivo and matched to the EM volume receive the image.
-  - Their drive is oriented contrast energy at their receptive-field centre and preferred orientation, mixed with untuned energy by their selectivity.
-  - Tuning and receptive-field centres come from the MICrONS digital twin (Ding et al. 2025 node table; Wang et al. 2025).
-  - Everything else is reached only through synapses.
-- **Tuning of the other cells** is mapped in silico, with drifting gratings at 12 orientations and counter-phase patches on a grid. For the imaged cells this recovers their measured preference (median error 1.6°) and receptive-field centre (0.7 px of 32).
+The engine is the **Allen Institute biorealistic V1 model** (point-neuron version of Billeh et al., *Neuron* 2020, rebuilt in [biorealistic-v1-model](https://github.com/AllenInstitute/biorealistic-v1-model)). MouseHarp uses network `core_nll_0` with its `bio_trained` weights, from the prebuilt networks of [V1_GLIF_model](https://github.com/JavierGalvan9/V1_GLIF_model).
 
-**Caveats.**
-- The gains are not fit to data, unlike the trained fly model behind FlyHarp.
-- Most axons in the volume are not proofread, so connectivity is incomplete.
-- The volume contains no thalamic cell bodies, so the measured tuning stands in for the real feedforward input.
-- The receptive-field cloud of the imaged cells (a patch of the visual field) is stretched to fill the camera frame.
+- **Neurons:** 17 cell classes. Each neuron is a GLIF3 point neuron fit to Allen patch-clamp data.
+- **Connections:** probabilities and strengths come from Allen synaptic physiology and MICrONS electron microscopy. The recurrent weights were then trained, with constraints on their distributions, to match Neuropixels recordings of mouse V1.
+- **Synapses:** each is a sum of four alpha functions, with delays per connection type.
+- **Background:** 100 Poisson sources at 250 Hz.
+- **Input:** the model's FilterNet LGN. Each of 17,400 units has a Gaussian receptive field and a temporal filter fit to mouse dLGN recordings (Durand et al. 2016). The types are sustained ON, sustained and transient OFF, and ON/OFF cells with offset subfields. The units fire Poisson spikes into V1.
+- **Not included:** a retinal stage (the LGN filters already contain the retina's transformation), feedback from V1 to LGN, and higher areas.
 
-This is the MICrONS wiring played through a simple model, not a simulation of mouse V1.
+**What runs in the browser.** The full column is 400 µm across, with 66,658 neurons, 24.5M recurrent and 31.6M LGN synapses, too large to ship. MouseHarp runs its central 200 µm:
+- 16,711 neurons and 12,383 LGN units, with every one of their LGN and background inputs kept.
+- Each synapse they received from the outer ring is rewired from a **stand-in** inside the column: a neuron of the same cell type whose responses in the full model best match the missing cell's (grey screen plus gratings in 8 directions).
+- Simpler stand-ins (class-average rates, with or without fluctuations) let layer 6 fall silent.
 
-## Rebuilding the data
+**Storage.** Weights are stored at 8 bits on a log scale. Targets are delta-coded. Synapse model and delay are recovered from cell types. The total download is about 36 MB.
 
-```
-tools/fetch_data.sh                  # ~1.1 GB from Zenodo and the MICrONS BossDB bucket
-cd tools
-python build_model.py                # join connectome + function, prune, rescale  -> build/model.npz
-python map_model.py                  # in-silico orientation and RF mapping          -> build/model_tuning.npz
-python export_web.py                 # browser files                                 -> ../data/
-node validate_engine.js ../data build/ref.json   # JS engine vs Python reference
-```
+## Validation
 
-The node table is a pandas pickle. `safe_pickle.py` loads it with a whitelisting unpickler (only the pandas/NumPy data classes it references), so no other code can run.
+The steps and synapses follow the trained model's TensorFlow implementation (exact GLIF3 propagators, soft reset, 1 ms steps). Running the cloned research code directly was not possible in my build environment, so the checks are against data and against my own full-column reference.
 
-## Data and credits
+**Full column (Python reimplementation), grey screen, against Neuropixels spontaneous rates** (mean Hz):
 
-- MICrONS Consortium et al., *Functional connectomics spanning multiple areas of mouse visual cortex*, Nature 2025.
-- Ding, Fahey, Papadopoulos et al., *Functional connectomics reveals general wiring rule in mouse visual cortex*, Nature 2025.
-- Wang et al., *Foundation model of neural activity predicts response to new stimulus types*, Nature 2025.
-- Schneider-Mizell et al., *Inhibitory specificity from a connectomic census of mouse visual cortex*, Nature 2025 (inhibitory classes).
-- Reimann, M. W., *Connectomics of (part of) the MICrONS mm3 dataset*, Zenodo 2025.
-- See [microns-explorer.org](https://www.microns-explorer.org) for MICrONS data terms. three.js (MIT) is vendored in `js/vendor`.
+| class | model | recorded |
+|---|---|---|
+| L2/3 excitatory | 1.2 | 1.5 |
+| L4 excitatory | 3.6 | 3.6 |
+| L5 excitatory | 5.5 | 5.7 |
+| L6 excitatory | 3.1 | 3.1 |
+| L4 PV | 9.7 | 10.5 |
+| L2/3 VIP | 12.2 | 12.6 |
+| L2/3 SST | 2.4 | 5.3 |
+
+**200 µm column with stand-ins vs full column, drifting gratings**
+- Rates per class are mostly within about 25%. The largest misses are L4 VIP (+46%) and L6 SST (−27%).
+- Orientation selectivity is weaker, most in deep layers (median OSI of L5 excitatory cells 0.23 vs 0.35).
+- 8-bit weights change nothing measurable.
+
+**Browser engine vs Python**
+- LGN rates are within 7% RMS.
+- Grey-screen rates per class are the same.
+- Orientation tuning: L4 cells preferring a 0° grating fire 5.2 Hz vs 2.9 Hz for those preferring 90°.
+- On the build server it runs at about 0.55× real time in Node.
+
+## Rebuilding
+
+`tools/v1/`:
+- `zipstream.py` pulls one network out of the Allen Dropbox archive as it streams.
+- `v1net.py` assembles the arrays.
+- `lgn.py` is FilterNet in numpy (uses BMTK for the filter definitions).
+- `v1sim.py` is the event-driven reference simulator.
+- `subcol.py` + `proxy.py` build the sub-column with stand-ins.
+- `gratings.py`, `osi.py`, `cmp.py` and `replay.py` are the checks.
+- `export_v1.py` writes `data/v1/`.
+- `validate_v1.js` and `tuning_v1.js` check the browser engine.
+
+Set `V1_NET` to the extracted `core_nll_0` folder, and `V1_BASIS_CSV` / `V1_GLIF_REPO` to the V1_GLIF_model checkout.
+
+## Credits
+
+- Billeh et al., *Systematic integration of structural and functional data into multi-scale models of mouse primary visual cortex*, Neuron 2020.
+- Allen Institute, [biorealistic-v1-model](https://github.com/AllenInstitute/biorealistic-v1-model) and J. Galván, [V1_GLIF_model](https://github.com/JavierGalvan9/V1_GLIF_model): network files, trained weights, synaptic basis functions, Neuropixels targets.
+- Durand et al., *A comparison of visual response properties in the lateral geniculate nucleus and primary visual cortex of awake and anesthetized mice*, J Neurosci 2016 (LGN filters, via BMTK FilterNet).
+- Allen Institute model files are covered by the Allen Institute Terms of Use.
+- three.js (MIT) is vendored in `js/vendor`.

@@ -2,7 +2,7 @@ import os
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.environ.get('MICRONS_DATA', os.path.join(HERE, 'microns_data'))   # downloaded source files
 BUILD = os.environ.get('MOUSEHARP_BUILD', os.path.join(HERE, 'build'))      # intermediate arrays
-WEB = os.path.join(HERE, '..', 'data')
+WEB = os.path.join(HERE, '..', '..', 'microns', 'data')
 os.makedirs(BUILD, exist_ok=True)
 import h5py, numpy as np, pandas as pd, sys
 sys.path.insert(0, HERE); import safe_pickle as sp
